@@ -7,10 +7,8 @@ import requests
 from bs4 import BeautifulSoup
 from loguru import logger
 
-# Configuration
 BASE_URL = "https://bea.aero"
 
-# Pages de listing des rapports publiés
 LIST_URLS = [
     "https://bea.aero/les-enquetes/derniers-rapports-aviation-generale/",
     "https://bea.aero/enquetes-de-securite/rapports-bea-transport-commercial/",
@@ -89,7 +87,6 @@ def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     logger.info(f"Scraping du BEA, max {MAX_REPORTS} rapports")
 
-    # Étape 1 : collecter les liens vers les pages de détail
     all_detail_urls = []
     for list_url in LIST_URLS:
         soup = get_page(list_url)
@@ -99,11 +96,9 @@ def main() -> None:
             all_detail_urls.extend(detail_urls)
         time.sleep(DELAY_SECONDS)
 
-    # Dédoublonnage
     all_detail_urls = list(set(all_detail_urls))
     logger.info(f"Total : {len(all_detail_urls)} pages de détail uniques")
 
-    # Étape 2 : visiter chaque page de détail et télécharger les PDFs
     downloaded = 0
     for detail_url in all_detail_urls:
         if downloaded >= MAX_REPORTS:
@@ -120,7 +115,6 @@ def main() -> None:
             logger.debug(f"Aucun PDF sur {detail_url}")
             continue
 
-        # Télécharge le premier PDF trouvé (souvent le rapport principal)
         for pdf_url in pdf_urls[:1]:
             if download_pdf(pdf_url, OUTPUT_DIR):
                 downloaded += 1
