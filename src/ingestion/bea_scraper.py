@@ -24,7 +24,6 @@ HEADERS = {
 
 
 def get_page(url: str) -> BeautifulSoup | None:
-    """Télécharge une page HTML et la parse. Renvoie None en cas d'erreur."""
     logger.info(f"GET {url}")
     try:
         response = requests.get(url, headers=HEADERS, timeout=30)
@@ -39,11 +38,9 @@ def get_page(url: str) -> BeautifulSoup | None:
 
 
 def find_detail_links(soup: BeautifulSoup) -> list[str]:
-    """Trouve les liens vers les pages de détail d'enquêtes."""
     detail_urls = []
     for link in soup.find_all("a", href=True):
         href = link["href"]
-        # Les pages de détail contiennent /detail/ dans l'URL
         if "/detail/" in href and "evenements-notifies" in href:
             absolute_url = urljoin(BASE_URL, href)
             if absolute_url not in detail_urls:
@@ -52,7 +49,6 @@ def find_detail_links(soup: BeautifulSoup) -> list[str]:
 
 
 def find_pdf_links(soup: BeautifulSoup) -> list[str]:
-    """Trouve tous les liens PDF dans une page."""
     pdf_urls = []
     for link in soup.find_all("a", href=True):
         href = link["href"]
@@ -63,14 +59,11 @@ def find_pdf_links(soup: BeautifulSoup) -> list[str]:
 
 
 def download_pdf(url: str, output_dir: Path) -> bool:
-    """Télécharge un PDF s'il n'est pas déjà présent."""
     filename = url.split("/")[-1]
     output_path = output_dir / filename
-
     if output_path.exists():
         logger.debug(f"Déjà présent : {filename}")
         return True
-
     try:
         response = requests.get(url, headers=HEADERS, timeout=60)
         response.raise_for_status()
