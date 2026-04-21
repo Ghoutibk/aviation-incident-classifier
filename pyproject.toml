@@ -19,6 +19,7 @@ dependencies = [
     "scikit-learn>=1.8.0",
     "sentence-transformers>=5.4.1",
     "sqlalchemy>=2.0.49",
+    "sqlmodel>=0.0.38",
     "streamlit>=1.56.0",
     "umap-learn>=0.5.12",
 ]
