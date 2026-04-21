@@ -23,7 +23,6 @@ def main() -> None:
 
     with Session(engine) as session:
         for pdf_path in pdf_files:
-            # Skip si déjà en base
             stmt = select(Report).where(Report.filename == pdf_path.name)
             if session.exec(stmt).first():
                 logger.debug(f"Deja en base : {pdf_path.name}")
