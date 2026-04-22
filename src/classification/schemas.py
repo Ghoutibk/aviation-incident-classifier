@@ -19,5 +19,5 @@ class IncidentClassification(BaseModel):
     )
     reasoning: str = Field(
         description="Justification brève (2-3 phrases) expliquant pourquoi ces domaines et cette criticité ont été retenus.",
-        max_length=500,
+        max_length=1200,
     )

@@ -42,6 +42,7 @@ RÈGLES :
 - Lis attentivement le rapport et identifie TOUS les domaines de risque pertinents (pas seulement le principal).
 - Évalue la criticité selon les CONSÉQUENCES réelles (blessés, décès, dommages), pas le potentiel.
 - Sois précis et factuel dans le reasoning, cite des éléments concrets du rapport.
+- IMPORTANT : le reasoning doit faire AU MAXIMUM 3 phrases courtes (500 caractères max au total). Sois concis.
 - Si tu hésites, baisse le niveau de confidence."""
 
 
