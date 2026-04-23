@@ -1,0 +1,316 @@
+{
+  "n_samples": 19,
+  "criticality": {
+    "accuracy": 0.2631578947368421,
+    "f1_macro": 0.15079365079365079,
+    "f1_weighted": 0.36424394319131165,
+    "confusion_matrix": [
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        6,
+        4,
+        7
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "classes": [
+      "minor",
+      "serious",
+      "major",
+      "catastrophic"
+    ]
+  },
+  "domains": {
+    "f1_macro": 0.8084656084656086,
+    "f1_micro": 0.8923076923076924,
+    "accuracy_subset": 0.6842105263157895,
+    "per_class": {
+      "human_factor": {
+        "precision": 0.9444444444444444,
+        "recall": 1.0,
+        "f1": 0.9714285714285714,
+        "support": 17
+      },
+      "technical": {
+        "precision": 0.8,
+        "recall": 1.0,
+        "f1": 0.8888888888888888,
+        "support": 4
+      },
+      "maintenance": {
+        "precision": 0.6666666666666666,
+        "recall": 1.0,
+        "f1": 0.8,
+        "support": 2
+      },
+      "weather": {
+        "precision": 0.75,
+        "recall": 1.0,
+        "f1": 0.8571428571428571,
+        "support": 3
+      },
+      "operations": {
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6666666666666666,
+        "support": 2
+      },
+      "infrastructure": {
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6666666666666666,
+        "support": 1
+      }
+    }
+  },
+  "errors": [
+    {
+      "filename": "F-BVZU.pdf",
+      "true_domains": [
+        "human_factor"
+      ],
+      "pred_domains": [
+        "human_factor",
+        "infrastructure"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "serious",
+      "difficulty": "easy",
+      "reasoning": "1. **human_factor** : Le rapport documente explicitement une prise de décision erronée du pilote, notamment sa volonté de réaliser le convoyage malgré l'approche de la nuit aéronautique, une préparati"
+    },
+    {
+      "filename": "F-BAYP.pdf",
+      "true_domains": [
+        "human_factor"
+      ],
+      "pred_domains": [
+        "human_factor",
+        "operations"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "catastrophic",
+      "difficulty": "hard",
+      "reasoning": "1) **human_factor** : Le rapport documente explicitement une **défaillance dans l'application des règles de priorité** (SERA, article 3210) et une **manœuvre d'évitement tardive** du pilote de parapen"
+    },
+    {
+      "filename": "78ASI.V2.pdf",
+      "true_domains": [
+        "human_factor"
+      ],
+      "pred_domains": [
+        "human_factor"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "catastrophic",
+      "difficulty": "easy",
+      "reasoning": "Le rapport documente explicitement une perte de contrôle en vol due à une incapacité de l'élève pilote à maîtriser un virage engagé, malgré les instructions répétées de l'instructeur. Aucune défaillan"
+    },
+    {
+      "filename": "F-HMFA.pdf",
+      "true_domains": [
+        "human_factor",
+        "weather"
+      ],
+      "pred_domains": [
+        "human_factor",
+        "weather"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "serious",
+      "difficulty": "medium",
+      "reasoning": "Le rapport documente explicitement une entrée en état de vortex (VRS) lors de l'approche finale, causée par une vitesse verticale excessive (1 000 à 1 600 ft/min) et une vitesse sol faible (<30 kt), a"
+    },
+    {
+      "filename": "F-HSLE.pdf",
+      "true_domains": [
+        "human_factor"
+      ],
+      "pred_domains": [
+        "human_factor"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "catastrophic",
+      "difficulty": "easy",
+      "reasoning": "Le rapport indique explicitement que la manœuvre délibérée du pilote (changement de trajectoire vers le relief) est compatible avec un 'raptus', une impulsion violente liée à son contexte psychoaffect"
+    },
+    {
+      "filename": "F-HDYN.pdf",
+      "true_domains": [
+        "human_factor"
+      ],
+      "pred_domains": [
+        "human_factor",
+        "operations"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "major",
+      "difficulty": "medium",
+      "reasoning": "Le rapport documente clairement une erreur de pilotage (gestion de l'atterrissage, rebonds, interruption tardive et remise de gaz) avec une pression opérationnelle et une planification inadéquate (hum"
+    },
+    {
+      "filename": "F-HTPS.pdf",
+      "true_domains": [
+        "human_factor",
+        "maintenance"
+      ],
+      "pred_domains": [
+        "human_factor",
+        "maintenance"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "serious",
+      "difficulty": "medium",
+      "reasoning": "1) **Domaine maintenance** : Le rapport documente explicitement un défaut de la jauge carburant associée au réservoir droit, identifié lors de la visite prévol. Ce défaut n'a pas été inscrit dans le c"
+    },
+    {
+      "filename": "F-PCSA.pdf",
+      "true_domains": [
+        "human_factor",
+        "technical"
+      ],
+      "pred_domains": [
+        "human_factor",
+        "technical"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "catastrophic",
+      "difficulty": "easy",
+      "reasoning": "Le domaine **human_factor** est identifié par la phrase explicite : « La faible expérience de vol sur un nouveau type d’avion a pu contribuer à une gestion inadaptée de la trajectoire de l’avion après"
+    },
+    {
+      "filename": "974PT.pdf",
+      "true_domains": [
+        "human_factor"
+      ],
+      "pred_domains": [
+        "human_factor",
+        "technical"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "catastrophic",
+      "difficulty": "easy",
+      "reasoning": "Le rapport documente explicitement un heurt des pales du rotor avec la poutre de queue en croisière, causé par un battement excessif des pales (technical). De plus, le pilote avait une vision monocula"
+    },
+    {
+      "filename": "F-HBCM.pdf",
+      "true_domains": [
+        "human_factor",
+        "maintenance"
+      ],
+      "pred_domains": [
+        "human_factor",
+        "maintenance"
+      ],
+      "true_criticality": "serious",
+      "pred_criticality": "minor",
+      "difficulty": "easy",
+      "reasoning": "Le domaine **maintenance** est identifié par l'erreur d'insertion de l'index de base (DOI) dans le logiciel de préparation du vol (erreur de signe : -15,5 saisi comme 15,5), ce qui a conduit à un cent"
+    },
+    {
+      "filename": "F-GJXO.pdf",
+      "true_domains": [
+        "human_factor"
+      ],
+      "pred_domains": [
+        "human_factor",
+        "weather"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "serious",
+      "difficulty": "easy",
+      "reasoning": "Le domaine **weather** est identifié par la présence explicite d'un groupe de cigognes ayant causé la collision aviaire, ce qui relève d'un risque lié à l'environnement aviaire (risque aviaire documen"
+    },
+    {
+      "filename": "EC-NGC.pdf",
+      "true_domains": [
+        "operations",
+        "technical"
+      ],
+      "pred_domains": [
+        "operations",
+        "technical"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "serious",
+      "difficulty": "hard",
+      "reasoning": "Le rapport documente une défaillance technique du transpondeur (technical) qui a entraîné une perte de suivi radar et une situation de proximité dangereuse entre deux aéronefs. Les contrôleurs aériens"
+    },
+    {
+      "filename": "F-ORVS.pdf",
+      "true_domains": [
+        "human_factor",
+        "weather"
+      ],
+      "pred_domains": [
+        "human_factor",
+        "weather"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "serious",
+      "difficulty": "hard",
+      "reasoning": "Le rapport documente clairement une approche non stabilisée avec des actions de pilotage simultanées et opposées (human_factor : 'actions de pilotage simultanées et opposées', 'pilotage simultané (Dua"
+    },
+    {
+      "filename": "3A-MVT.pdf",
+      "true_domains": [
+        "human_factor",
+        "weather"
+      ],
+      "pred_domains": [
+        "human_factor",
+        "weather"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "catastrophic",
+      "difficulty": "medium",
+      "reasoning": "Le rapport documente explicitement une **conduite de vol sous l'emprise de drogues** (facteur humain) et une **entrée dans une couche nuageuse avec perte de références visuelles** (conditions météorol"
+    },
+    {
+      "filename": "F-HTYO.pdf",
+      "true_domains": [
+        "technical"
+      ],
+      "pred_domains": [
+        "human_factor",
+        "maintenance",
+        "technical"
+      ],
+      "true_criticality": "serious",
+      "pred_criticality": "serious",
+      "difficulty": "easy",
+      "reasoning": "1) **Maintenance** : Le rapport mentionne explicitement une \"absence de détection des endommagements sur un radôme en maintenance\" comme facteur contributif. Cela indique un problème clair dans les pr"
+    },
+    {
+      "filename": "F-BXEU.pdf",
+      "true_domains": [
+        "human_factor",
+        "operations"
+      ],
+      "pred_domains": [
+        "human_factor",
+        "operations"
+      ],
+      "true_criticality": "major",
+      "pred_criticality": "catastrophic",
+      "difficulty": "hard",
+      "reasoning": "Le rapport documente explicitement une collision en vol entre deux aéronefs en vol à vue (VFR), avec décès multiples et destruction totale des deux appareils. Les facteurs contributifs incluent : 1) *"
+    }
+  ]
+}

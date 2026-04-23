@@ -14,8 +14,9 @@ class RiskDomain(str, Enum):
 
 class Criticality(str, Enum):
     MINOR = "minor"                        # incident, pas de blesse, dommages legers
-    MAJOR = "major"                        # incident grave, blesses, dommages importants
-    CATASTROPHIC = "catastrophic"          # accident avec deces ou destruction totale
+    SERIOUS = "serious"                    # incident grave sans deces, dommages importants
+    MAJOR = "major"                        # accident avec deces ou dommages tres graves
+    CATASTROPHIC = "catastrophic"          # accident avec deces multiples ou destruction totale
 
 
 DOMAIN_DESCRIPTIONS = {
@@ -29,6 +30,7 @@ DOMAIN_DESCRIPTIONS = {
 
 CRITICALITY_DESCRIPTIONS = {
     Criticality.MINOR: "Incident mineur : aucun blessé, dommages matériels limités, poursuite du vol ou atterrissage normal.",
-    Criticality.MAJOR: "Incident majeur ou grave : blessés (non mortels), dommages importants à l'aéronef, atterrissage forcé, évacuation d'urgence.",
-    Criticality.CATASTROPHIC: "Accident catastrophique : décès, destruction totale ou quasi-totale de l'aéronef.",
+    Criticality.SERIOUS: "Incident grave : blessés non mortels, dommages importants, atterrissage forcé, évacuation d'urgence, mais sans décès.",
+    Criticality.MAJOR: "Accident majeur : décès isolé(s) ou dommages très graves avec destruction partielle de l'aéronef.",
+    Criticality.CATASTROPHIC: "Accident catastrophique : décès multiples ou destruction totale de l'aéronef.",
 }

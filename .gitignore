@@ -11,3 +11,5 @@ wheels/
 .env
 data/raw/
 .venv/
+*.db
+data/bea.db
