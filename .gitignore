@@ -13,3 +13,4 @@ data/raw/
 .venv/
 *.db
 data/bea.db
+data/chroma/
