@@ -57,7 +57,7 @@ PDFs BEA
    ▼
 [6] Indexation vectorielle ────► src/vector_store/indexer.py
    │                              Découpage en chunks → embeddings multilingues
-   │                              → ChromaDB (2 500+ chunks, ~100 k vecteurs max)
+   │                              → ChromaDB (2 500+ chunks, ~100 000 vecteurs max)
    ▼
 [7] Veille EASA ───────────────► src/regulatory/
    │                              Scraping & stockage des alertes réglementaires
