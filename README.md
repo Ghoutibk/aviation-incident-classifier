@@ -29,9 +29,47 @@ Transformer 100+ rapports PDF du BEA en une base de connaissances interrogeable,
 
 ## 🏗️ Architecture
 
-
----------------------------------------------------------------------
----------------------------------------------------------------------
+```
+aviation-incident-classifier/
+├── app/
+│   └── streamlit_app.py        # Interface Streamlit (chatbot RAG, dashboard, UMAP)
+├── src/
+│   ├── ingestion/              # Scraping BEA + parsing PDF → SQLite
+│   │   ├── bea_scraper.py
+│   │   ├── pdf_parser.py
+│   │   └── run_parsing.py
+│   ├── db/
+│   │   └── models.py           # Modèles SQLModel (Report, Classification, HFACSFactor, RegulatoryAlert)
+│   ├── classification/         # Classification multi-label via Mistral + Pydantic
+│   │   ├── classifier.py
+│   │   ├── schemas.py
+│   │   └── taxonomy.py         # 6 domaines × 3 criticités
+│   ├── extraction/             # Extraction des facteurs HFACS
+│   │   ├── hfacs_extractor.py
+│   │   └── hfacs_schema.py
+│   ├── vector_store/           # Indexation ChromaDB (2 500+ chunks, embeddings multilingues)
+│   │   ├── chunker.py
+│   │   ├── indexer.py
+│   │   └── chroma_client.py
+│   ├── rag/                    # RAG Chain LangChain + Mistral (retrieval top-5, < 3 s)
+│   │   ├── chain.py
+│   │   └── retriever.py
+│   ├── weak_signals/           # Clustering HDBSCAN + visualisation UMAP
+│   │   ├── clustering.py
+│   │   └── visualization.py
+│   ├── regulatory/             # Veille réglementaire EASA
+│   │   ├── easa_scraper.py
+│   │   └── alert_analyzer.py
+│   ├── evaluation/             # Évaluation du classifier (F1 macro ~0.81)
+│   │   └── evaluate.py
+│   └── api/
+│       └── main.py             # API REST FastAPI (endpoints + /docs)
+├── data/
+│   ├── reports/                # PDFs BEA téléchargés
+│   ├── chroma_db/              # Base vectorielle ChromaDB (persistance disque)
+│   └── annotated/              # Jeu d'évaluation annoté manuellement
+└── main.py                     # Point d'entrée principal
+```
 
 ## 🚀 Quick Start
 
