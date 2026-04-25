@@ -128,54 +128,13 @@ uv run uvicorn src.api.main:app --reload
 
 ---
 
-## 🔧 Choix techniques
-
-### Pourquoi Mistral plutôt qu'OpenAI ?
-
-- **Souveraineté** : modèle européen, pertinent pour des données de sécurité aérienne
-- **Coût** : Mistral Small à 0.20 €/M tokens vs GPT-4 à 30 €/M tokens (150× moins cher)
-- **Qualité suffisante** : le français natif suffit pour cette tâche de classification
-
-### Pourquoi HFACS pour l'extraction ?
-
-Le modèle HFACS (Wiegmann & Shappell, 2003) est un **standard reconnu en safety aéronautique**. Les rapports BEA évoquent implicitement cette structure à 4 niveaux. Utiliser HFACS rend l'extraction :
-- Plus structurée qu'une extraction libre
-- Alignée avec les pratiques pro du domaine
-- Interprétable pour un expert sécurité
-
-### Pourquoi ChromaDB plutôt que pgvector / FAISS ?
-
-Pour un POC à 2500 chunks, **ChromaDB en mode embedded** (juste un fichier) offre :
-- Installation trivial : `pip install chromadb`, rien à configurer
-- API Python native, intégration LangChain immédiate
-- Persistance sur disque, pas de service à lancer
-- Suffisant jusqu'à ~100k vecteurs
-
-Pour du scaling production, **Qdrant** serait le choix (client-server, gRPC, replication). Pour >1M vecteurs avec PostgreSQL existant, **pgvector**.
-
-### Pourquoi HDBSCAN pour le clustering ?
-
-- **Pas besoin de fixer k** (contrairement à KMeans) : on ne sait pas a priori combien de thèmes existent
-- **Gère le bruit** : les rapports atypiques sont labellisés `-1` au lieu d'être forcés dans un cluster
-- **Clusters de tailles variables** : un thème rare (5 rapports) coexiste avec un thème dominant (40 rapports)
-- Référence standard en text clustering depuis 2017
-
-### Sortie structurée Pydantic
-
-Chaque appel LLM retourne un objet Pydantic validé (pas un texte libre à re-parser). Avantages :
-- **Fiabilité** : si le JSON est invalide, LangChain retry automatiquement
-- **Typage fort** : utilisable directement dans le code Python
-- **Documentation** : le schéma Pydantic sert à la fois de contrat LLM et de doc API
-
----
-
 ## 🛡️ Gouvernance & Explicabilité (AI Act)
 
 Le projet intègre plusieurs principes du Règlement européen sur l'IA (AI Act) :
 
 - **Traçabilité des prédictions** (Art. 12-13) : chaque classification stocke `model_name`, `classified_at`, `confidence` et `reasoning`
 - **Transparence** : le champ `reasoning` de chaque classification explique les décisions du LLM
-- **Qualité des données** (Art. 10) : le jeu d'évaluation est documenté, les annotations manuelles sont versionnées
+- **Qualité des données** : le jeu d'évaluation est documenté, les annotations manuelles sont versionnées
 - **Logging structuré** : tous les appels LLM sont loggés avec `loguru` pour audit
 
 ---
@@ -196,7 +155,3 @@ uv run python -m src.evaluation.evaluate
 ```
 
 Les résultats sont sauvegardés dans `data/annotated/evaluation_results.json`.
-
----
-
-## 🗂️ Structure du projet
