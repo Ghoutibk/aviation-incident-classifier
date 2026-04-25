@@ -16,7 +16,6 @@ from src.extraction.hfacs_schema import ContributingFactors
 
 load_dotenv()
 
-# On utilise Mistral Small : bon compromis qualité/coût pour ce volume
 MODEL_NAME = "mistral-small-latest"
 
 # Le prompt système explique HFACS au LLM ET lui donne les règles d'extraction
