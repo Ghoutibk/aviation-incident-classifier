@@ -51,7 +51,7 @@ aviation-incident-classifier/
 │   │   ├── chunker.py
 │   │   ├── indexer.py
 │   │   └── chroma_client.py
-│   ├── rag/                    # RAG Chain LangChain + Mistral (retrieval top-5, < 3 s)
+│   ├── rag/                    # RAG Chain LangChain + Mistral (retrieval top-5)
 │   │   ├── chain.py
 │   │   └── retriever.py
 │   ├── weak_signals/           # Clustering HDBSCAN + visualisation UMAP
@@ -60,7 +60,7 @@ aviation-incident-classifier/
 │   ├── regulatory/             # Veille réglementaire EASA
 │   │   ├── easa_scraper.py
 │   │   └── alert_analyzer.py
-│   ├── evaluation/             # Évaluation du classifier (F1 macro ~0.81)
+│   ├── evaluation/             # Évaluation du classifier
 │   │   └── evaluate.py
 │   └── api/
 │       └── main.py             # API REST FastAPI (endpoints + /docs)
