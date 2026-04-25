@@ -14,3 +14,4 @@ data/raw/
 *.db
 data/bea.db
 data/chroma/
+data/weak_signals_umap.html

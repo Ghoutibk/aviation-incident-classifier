@@ -72,3 +72,15 @@ class FactorsExtraction(SQLModel, table=True):
 
     model_name: str
     extracted_at: datetime = Field(default_factory=datetime.now)
+
+
+class RegulatoryAlert(SQLModel, table=True):
+    """Alerte de veille réglementaire (EASA, DGAC)."""
+    id: int | None = Field(default=None, primary_key=True)
+    source: str = Field(index=True)      
+    url: str = Field(unique=True)
+    title: str
+    summary: str                           
+    relevance_themes: str                  
+    published_date: str | None = None
+    fetched_at: datetime = Field(default_factory=datetime.now)
