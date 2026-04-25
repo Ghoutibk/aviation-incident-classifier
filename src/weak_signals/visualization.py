@@ -1,10 +1,4 @@
-"""Visualisation 2D des clusters avec UMAP + Plotly.
-
-UMAP : Uniform Manifold Approximation and Projection.
-Projette des vecteurs haute dimension (768D) vers 2D en préservant
-la structure locale (points proches en 768D restent proches en 2D).
-Plus performant que t-SNE pour les grands datasets.
-"""
+"""Visualisation 2D des clusters : UMAP pour la projection, Plotly pour l'interactivité."""
 import numpy as np
 import plotly.express as px
 import umap
@@ -19,10 +13,40 @@ from src.weak_signals.clustering import aggregate_report_embeddings, cluster_rep
 def build_umap_figure() -> Figure:
     """Génère un scatter plot Plotly interactif des rapports clusterisés."""
     report_embeddings = aggregate_report_embeddings()
+    if not report_embeddings:
+        fig = px.scatter(title="Signaux faibles")
+        fig.add_annotation(
+            text="Aucun embedding disponible pour le moment.<br>Lance l’indexation vectorielle pour afficher cette vue.",
+            showarrow=False,
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+        )
+        fig.update_xaxes(visible=False)
+        fig.update_yaxes(visible=False)
+        fig.update_layout(template="plotly_white")
+        return fig
+
+    if len(report_embeddings) < 2:
+        fig = px.scatter(title="Signaux faibles")
+        fig.add_annotation(
+            text="Il faut au moins 2 rapports vectorisés pour calculer une projection UMAP.",
+            showarrow=False,
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+        )
+        fig.update_xaxes(visible=False)
+        fig.update_yaxes(visible=False)
+        fig.update_layout(template="plotly_white")
+        return fig
+
     report_ids = list(report_embeddings.keys())
     X = np.array([report_embeddings[rid] for rid in report_ids])
 
-    # UMAP projection
+    # cosine plutôt qu'euclidean : les embeddings de phrase sont normalisés, la direction compte plus que la norme
     reducer = umap.UMAP(
         n_components=2,
         n_neighbors=15,
@@ -33,14 +57,12 @@ def build_umap_figure() -> Figure:
     coords_2d = reducer.fit_transform(X)
     logger.info("Projection UMAP calculée")
 
-    # Récupère les labels de cluster + metadata
     clusters = cluster_reports()
     label_by_report = {}
     for c in clusters:
         for fname in c.report_filenames:
             label_by_report[fname] = c.cluster_id
 
-    # Récupère les metadata des rapports
     filenames, labels, refs = [], [], []
     with Session(engine) as session:
         for rid in report_ids:

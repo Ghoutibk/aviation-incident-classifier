@@ -1,17 +1,8 @@
-"""Détection de signaux faibles par clustering HDBSCAN sur embeddings.
+"""Détection de signaux faibles par clustering HDBSCAN.
 
-Principe :
-1. On récupère tous les embeddings des rapports depuis ChromaDB
-2. On agrège les chunks par rapport (moyenne des embeddings) pour avoir
-   1 vecteur par rapport (plus pertinent pour clusterer des rapports entiers)
-3. On clusterise avec HDBSCAN → groupes de rapports thématiquement proches
-4. On identifie les clusters 'émergents' : forte proportion de rapports récents
-
-Pourquoi HDBSCAN et pas KMeans :
-- Pas besoin de fixer k à l'avance (on ne sait pas combien de thèmes)
-- Gère le bruit (rapports hors cluster labellisés -1)
-- Clusters de tailles variables (thèmes rares vs fréquents)
-- Hiérarchique : structure plus riche que KMeans
+HDBSCAN plutôt que KMeans : on ne connaît pas le nombre de thèmes à l'avance,
+et les rapports hors-sujet sont mieux gérés comme du bruit (label -1) que
+forcés dans un cluster.
 """
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -38,10 +29,7 @@ class ReportCluster:
 
 
 def aggregate_report_embeddings() -> dict[int, np.ndarray]:
-    """Récupère tous les chunks de Chroma et agrège par rapport (moyenne).
-
-    Returns : dict {report_id: embedding_moyen_768dim}.
-    """
+    """Un rapport = plusieurs chunks, donc on moyenne pour avoir un seul vecteur par rapport."""
     client = get_chroma_client()
     collection = get_or_create_collection(client)
 
@@ -50,12 +38,10 @@ def aggregate_report_embeddings() -> dict[int, np.ndarray]:
     embeddings = np.array(data["embeddings"])
     metadatas = data["metadatas"]
 
-    # Regrouper les embeddings par report_id
     grouped: dict[int, list[np.ndarray]] = defaultdict(list)
     for emb, meta in zip(embeddings, metadatas):
         grouped[meta["report_id"]].append(emb)
 
-    # Moyenne par rapport (centroide du rapport dans l'espace sémantique)
     report_embeddings = {
         rid: np.mean(vecs, axis=0) for rid, vecs in grouped.items()
     }
@@ -64,13 +50,18 @@ def aggregate_report_embeddings() -> dict[int, np.ndarray]:
 
 
 def cluster_reports(min_cluster_size: int = 3) -> list[ReportCluster]:
-    """Applique HDBSCAN sur les embeddings de rapports.
-
-    min_cluster_size=3 : un 'cluster' doit contenir au moins 3 rapports,
-    sinon c'est considéré comme du bruit. Valeur adaptée à notre corpus
-    de ~100 rapports : trop haut = peu de clusters, trop bas = trop de bruit.
-    """
+    """min_cluster_size=3 est calibré pour un corpus ~100 rapports — ajuster si le volume change."""
     report_embeddings = aggregate_report_embeddings()
+    if not report_embeddings:
+        logger.warning("Aucun embedding disponible : clustering ignoré")
+        return []
+
+    if len(report_embeddings) < min_cluster_size:
+        logger.warning(
+            f"Pas assez de rapports vectorisés pour HDBSCAN : {len(report_embeddings)} < {min_cluster_size}"
+        )
+        return []
+
     report_ids = list(report_embeddings.keys())
     X = np.array([report_embeddings[rid] for rid in report_ids])
 
@@ -85,7 +76,6 @@ def cluster_reports(min_cluster_size: int = 3) -> list[ReportCluster]:
     n_noise = list(labels).count(-1)
     logger.info(f"HDBSCAN : {n_clusters} clusters trouvés, {n_noise} points bruit")
 
-    # Enrichir chaque cluster avec les métadonnées des rapports
     clusters_dict: dict[int, ReportCluster] = defaultdict(
         lambda: ReportCluster(cluster_id=-999)
     )
@@ -111,17 +101,15 @@ def cluster_reports(min_cluster_size: int = 3) -> list[ReportCluster]:
                 except ValueError:
                     pass
 
-    # Calcul de métriques par cluster
     result = []
     for label, cluster in clusters_dict.items():
         cluster.size = len(cluster.report_filenames)
-        # Ratio de rapports 'récents' (2024+) = signal d'émergence
+        # 2024+ comme proxy d'émergence — à ajuster selon l'horizon d'analyse
         if cluster.years:
             recent_count = sum(1 for y in cluster.years if y >= 2024)
             cluster.recent_ratio = recent_count / len(cluster.years)
         result.append(cluster)
 
-    # Trier: clusters récents puis grands clusters
     result.sort(key=lambda c: (-c.recent_ratio, -c.size))
     return result
 
