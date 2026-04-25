@@ -29,134 +29,47 @@ Transformer 100+ rapports PDF du BEA en une base de connaissances interrogeable,
 
 ## 🏗️ Architecture
 
-### Vue d'ensemble du pipeline
-
-Le système suit un pipeline linéaire en 10 étapes, depuis la collecte brute des PDFs jusqu'à l'exposition via deux interfaces :
-
 ```
-PDFs BEA
-   │
-   ▼
-[1] Scraping BEA ──────────────► src/ingestion/bea_scraper.py
-   │                              Téléchargement des rapports publics BEA
-   ▼
-[2] Parsing PDF ───────────────► src/ingestion/pdf_parser.py
-   │                              Extraction du texte brut + métadonnées
-   ▼
-[3] Stockage SQLite ───────────► src/db/ (SQLModel)
-   │                              Tables : Report, Classification, HFACSFactor,
-   │                              RegulatoryAlert
-   ▼
-[4] Classification LLM ────────► src/classification/
-   │                              Mistral small-latest + sortie structurée Pydantic
-   │                              6 domaines × 3 criticités → F1 macro ~0.81
-   ▼
-[5] Extraction HFACS ──────────► src/extraction/
-   │                              Facteurs contributifs humains/organisationnels
-   │                              structurés selon le modèle Wiegmann & Shappell
-   ▼
-[6] Indexation vectorielle ────► src/vector_store/indexer.py
-   │                              Découpage en chunks → embeddings multilingues
-   │                              → ChromaDB (2 500+ chunks, ~100 000 vecteurs max)
-   ▼
-[7] Veille EASA ───────────────► src/regulatory/
-   │                              Scraping & stockage des alertes réglementaires
-   ▼
-[8] Détection signaux faibles ─► src/weak_signals/
-   │                              HDBSCAN (clustering sans k fixé) + UMAP (2D)
-   ▼
-[9] RAG Chain ─────────────────► src/rag/
-   │                              Retrieval top-5 dans ChromaDB via LangChain
-   │                              → Génération de réponse par Mistral (< 3 s)
-   ▼
-[10] Interfaces utilisateur
-      ├── Streamlit ────────────► app/streamlit_app.py  (démo interactive)
-      └── FastAPI ──────────────► src/api/main.py       (REST API + /docs)
+aviation-incident-classifier/
+├── app/
+│   └── streamlit_app.py        # Interface Streamlit (chatbot RAG, dashboard, UMAP)
+├── src/
+│   ├── ingestion/              # Scraping BEA + parsing PDF → SQLite
+│   │   ├── bea_scraper.py
+│   │   ├── pdf_parser.py
+│   │   └── run_parsing.py
+│   ├── db/
+│   │   └── models.py           # Modèles SQLModel (Report, Classification, HFACSFactor, RegulatoryAlert)
+│   ├── classification/         # Classification multi-label via Mistral + Pydantic
+│   │   ├── classifier.py
+│   │   ├── schemas.py
+│   │   └── taxonomy.py         # 6 domaines × 3 criticités
+│   ├── extraction/             # Extraction des facteurs HFACS
+│   │   ├── hfacs_extractor.py
+│   │   └── hfacs_schema.py
+│   ├── vector_store/           # Indexation ChromaDB (2 500+ chunks, embeddings multilingues)
+│   │   ├── chunker.py
+│   │   ├── indexer.py
+│   │   └── chroma_client.py
+│   ├── rag/                    # RAG Chain LangChain + Mistral (retrieval top-5, < 3 s)
+│   │   ├── chain.py
+│   │   └── retriever.py
+│   ├── weak_signals/           # Clustering HDBSCAN + visualisation UMAP
+│   │   ├── clustering.py
+│   │   └── visualization.py
+│   ├── regulatory/             # Veille réglementaire EASA
+│   │   ├── easa_scraper.py
+│   │   └── alert_analyzer.py
+│   ├── evaluation/             # Évaluation du classifier (F1 macro ~0.81)
+│   │   └── evaluate.py
+│   └── api/
+│       └── main.py             # API REST FastAPI (endpoints + /docs)
+├── data/
+│   ├── reports/                # PDFs BEA téléchargés
+│   ├── chroma_db/              # Base vectorielle ChromaDB (persistance disque)
+│   └── annotated/              # Jeu d'évaluation annoté manuellement
+└── main.py                     # Point d'entrée principal
 ```
-
-### Flux de données
-
-```
-Rapport PDF
-    │
-    ├─► Texte brut ──► SQLite (table Report)
-    │                        │
-    │        ┌───────────────┼───────────────┐
-    │        ▼               ▼               ▼
-    │   Classification   Extraction      Veille
-    │   (Mistral LLM)    HFACS           EASA
-    │        │               │
-    │        └───────────────┘
-    │                │
-    │           SQLite (Classification, HFACSFactor)
-    │
-    ├─► Chunks (LangChain TextSplitter)
-    │        │
-    │        ▼
-    │   Embeddings multilingues (sentence-transformers)
-    │        │
-    │        ▼
-    │   ChromaDB (persistance sur disque)
-    │        │
-    │        ├─► Clustering HDBSCAN + projection UMAP (signaux faibles)
-    │        │
-    │        └─► RAG Chain (retrieval top-5 → Mistral → réponse citée)
-    │
-    └─► Interfaces : Streamlit UI  /  FastAPI REST
-```
-
-### Modules IA principaux
-
-| Module | Technologie | Rôle |
-|---|---|---|
-| `classification/` | Mistral + Pydantic | Classification multi-label : 6 domaines (facteur humain, technique, météo, ATC, procédures, environnement) × 3 criticités (faible / modérée / élevée) |
-| `extraction/` | Mistral + Pydantic | Extraction structurée des facteurs HFACS à 4 niveaux : Unsafe Acts → Preconditions → Supervision → Organizational |
-| `vector_store/` | ChromaDB + LangChain | Indexation de 2 500+ chunks avec embeddings multilingues ; persistance fichier, pas de service externe |
-| `rag/` | LangChain RetrievalQA | Retrieval sémantique top-5 puis génération par Mistral ; temps de réponse < 3 s |
-| `weak_signals/` | HDBSCAN + UMAP | Clustering sans nombre de clusters fixé, projection 2D pour visualisation des thèmes émergents |
-| `regulatory/` | Scraping + SQLModel | Veille automatisée sur les publications EASA, stockage et exposition via API |
-
-### Base de données (SQLModel / SQLite)
-
-```
-Report ──────────────┐
-  id, title, date,   │ 1─────N  Classification
-  url, raw_text,     │            domain, criticality,
-  parsed_at          │            confidence, reasoning,
-                     │            model_name, classified_at
-                     │
-                     │ 1─────N  HFACSFactor
-                                  level, category,
-                                  description, extracted_at
-
-RegulatoryAlert
-  id, source, title, date, url, content
-```
-
-Chaque `Classification` conserve `model_name`, `classified_at`, `confidence` et `reasoning` pour assurer la traçabilité des prédictions (conformité AI Act Art. 12-13).
-
-### Intégration Mistral / LangChain / ChromaDB
-
-```python
-# Chaîne RAG (src/rag/)
-retriever = chroma_vectorstore.as_retriever(search_kwargs={"k": 5})
-chain = RetrievalQA.from_chain_type(
-    llm=ChatMistralAI(model="mistral-small-latest"),
-    retriever=retriever,
-)
-
-# Classification structurée (src/classification/)
-chain = prompt | llm.with_structured_output(ClassificationOutput)  # Pydantic
-```
-
-LangChain orchestre les appels LLM avec retry automatique sur JSON invalide ; ChromaDB est utilisé en mode **embedded** (un seul répertoire `data/chroma_db/`), sans service séparé à lancer.
-
-### Interfaces utilisateur
-
-| Interface | Commande de lancement | Fonctionnalités principales |
-|---|---|---|
-| **Streamlit** (`app/streamlit_app.py`) | `uv run streamlit run app/streamlit_app.py` | Chatbot RAG, visualisation UMAP des clusters, tableau de bord des classifications, alertes EASA |
-| **FastAPI** (`src/api/main.py`) | `uv run uvicorn src.api.main:app --reload` | Endpoints REST pour rapports, classifications, facteurs HFACS, alertes ; documentation interactive sur `/docs` |
 
 ## 🚀 Quick Start
 
