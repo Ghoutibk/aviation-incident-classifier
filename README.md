@@ -97,7 +97,7 @@ cp .env.example .env
 ### Pipeline complet
 
 ```bash
-# 1. Scraper les rapports BEA (~15 min)
+# 1. Scraper les rapports BEA (~5 min)
 uv run python src/ingestion/bea_scraper.py
 
 # 2. Parser les PDFs et stocker en SQLite (~2 min)
@@ -106,13 +106,13 @@ uv run python -m src.ingestion.run_parsing
 # 3. Classifier tous les rapports via Mistral (~5 min)
 uv run python -m src.classification.run_classification
 
-# 4. Extraire les facteurs HFACS (~10 min)
+# 4. Extraire les facteurs HFACS
 uv run python -m src.extraction.run_extraction
 
-# 5. Indexer dans ChromaDB (~5 min, 1er run plus long car téléchargement modèle)
+# 5. Indexer dans ChromaDB
 uv run python -m src.vector_store.indexer
 
-# 6. Récupérer les alertes EASA (~1 min)
+# 6. Récupérer les alertes EASA
 uv run python -m src.regulatory.run_regulatory
 ```
 
